@@ -1,872 +1,760 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="h-full">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>E-Commerce Business & Operational Dashboard</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
-                    colors: {
-                        brand: {
-                            50: '#eff6ff',
-                            100: '#dbeafe',
-                            500: '#3b82f6',
-                            600: '#2563eb',
-                            700: '#1d4ed8',
-                        }
-                    }
-                }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>E-Commerce Analytics Dashboard</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <!-- Google Fonts Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
             }
+          }
         }
-    </script>
-    <style>
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: rgba(0,0,0,0.05);
-        }
-        ::-webkit-scrollbar-thumb {
-            background: rgba(100,100,100,0.2);
-            border-radius: 3px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(100,100,100,0.4);
-        }
-        .chart-container {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            min-height: 280px;
-        }
-    </style>
+      }
+    }
+  </script>
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(0,0,0,0.05);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(0,0,0,0.2);
+      border-radius: 9999px;
+    }
+    .dark ::-webkit-scrollbar-track {
+      background: rgba(255,255,255,0.05);
+    }
+    .dark ::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.2);
+    }
+  </style>
 </head>
-<body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100 font-sans transition-colors duration-200 min-h-screen flex flex-col">
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 font-sans min-h-screen transition-colors duration-200 antialiased">
 
-    <!-- Top Navigation Header -->
-    <header class="bg-white dark:bg-slate-800 shadow-md border-b border-slate-200 dark:border-slate-700 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                
-                <!-- Logo / Title -->
-                <div class="flex items-center space-x-3">
-                    <div class="bg-brand-600 text-white p-2.5 rounded-xl shadow-md flex items-center justify-center">
-                        <i class="fa-solid fa-chart-line text-xl"></i>
-                    </div>
-                    <div>
-                        <h1 class="font-bold text-lg sm:text-xl leading-tight">E-Commerce Analytics</h1>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">Dataset (+540k registros) • UK Retail</p>
-                    </div>
-                </div>
-
-                <!-- Navigation Tabs -->
-                <nav class="hidden md:flex space-x-2 bg-slate-100 dark:bg-slate-700/50 p-1 rounded-xl">
-                    <button id="tab-gerencial" onclick="switchTab('gerencial')" class="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-150 shadow-sm bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400">
-                        <i class="fa-solid fa-briefcase"></i>
-                        <span>Vista Gerencial</span>
-                    </button>
-                    <button id="tab-operativa" onclick="switchTab('operativa')" class="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-150 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">
-                        <i class="fa-solid fa-boxes-packing"></i>
-                        <span>Vista Operativa</span>
-                    </button>
-                </nav>
-
-                <!-- Actions & Dark Mode Toggle -->
-                <div class="flex items-center space-x-3">
-                    <button onclick="toggleDarkMode()" class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
-                        <i id="theme-icon" class="fa-solid fa-moon text-lg"></i>
-                    </button>
-                    <button onclick="exportTableToCSV()" class="hidden sm:flex items-center space-x-2 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white dark:bg-brand-600 dark:hover:bg-brand-700 text-xs font-semibold shadow-sm transition-all">
-                        <i class="fa-solid fa-download"></i>
-                        <span>Exportar CSV</span>
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Mobile Tab Bar -->
-            <div class="flex md:hidden border-t border-slate-200 dark:border-slate-700 py-2 justify-around">
-                <button id="tab-gerencial-mob" onclick="switchTab('gerencial')" class="flex-1 text-center py-2 text-xs font-semibold text-brand-600 dark:text-brand-400 border-b-2 border-brand-600">
-                    <i class="fa-solid fa-briefcase block text-base mb-1"></i> Gerencial
-                </button>
-                <button id="tab-operativa-mob" onclick="switchTab('operativa')" class="flex-1 text-center py-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
-                    <i class="fa-solid fa-boxes-packing block text-base mb-1"></i> Operativa
-                </button>
-            </div>
+  <!-- Header Section -->
+  <header class="sticky top-0 z-40 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col md:flex-row items-center justify-between gap-4">
+      
+      <!-- Brand & Subtitle -->
+      <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-500 flex items-center justify-center text-white shadow-md shadow-brand-500/20">
+            <i class="fa-solid font-bold fa-chart-line text-lg"></i>
+          </div>
+          <div>
+            <h1 class="text-xl font-bold tracking-tight text-slate-900 dark:text-white leading-tight">E-Commerce Analytics</h1>
+            <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Dataset (+540k registros) • UK Retail</p>
+          </div>
         </div>
-    </header>
 
-    <!-- Global Controls & Filters Bar -->
-    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 w-full">
-        <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 flex flex-wrap items-center justify-between gap-4">
-            <div class="flex items-center space-x-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
-                <i class="fa-solid fa-filter text-brand-500"></i>
-                <span>Filtros Globales:</span>
-            </div>
-            <div class="flex flex-wrap items-center gap-3 text-xs sm:text-sm">
-                <!-- Country Filter -->
-                <div class="flex items-center space-x-1.5 bg-slate-50 dark:bg-slate-700 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-600">
-                    <label for="filter-country" class="text-slate-500 dark:text-slate-400 font-medium">País:</label>
-                    <select id="filter-country" onchange="applyFilters()" class="bg-transparent font-semibold focus:outline-none cursor-pointer">
-                        <option value="ALL">Todos los países</option>
-                        <option value="United Kingdom">United Kingdom</option>
-                        <option value="Netherlands">Netherlands</option>
-                        <option value="EIRE">EIRE</option>
-                        <option value="Germany">Germany</option>
-                        <option value="France">France</option>
-                        <option value="Australia">Australia</option>
-                    </select>
-                </div>
-
-                <!-- Year Filter -->
-                <div class="flex items-center space-x-1.5 bg-slate-50 dark:bg-slate-700 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-600">
-                    <label for="filter-year" class="text-slate-500 dark:text-slate-400 font-medium">Año:</label>
-                    <select id="filter-year" onchange="applyFilters()" class="bg-transparent font-semibold focus:outline-none cursor-pointer">
-                        <option value="ALL">2010 - 2011</option>
-                        <option value="2010">2010</option>
-                        <option value="2011">2011</option>
-                    </select>
-                </div>
-
-                <!-- Reset Button -->
-                <button onclick="resetFilters()" class="text-xs text-brand-600 dark:text-brand-400 font-semibold hover:underline">
-                    Resetear
-                </button>
-            </div>
+        <!-- Mobile Dark Mode & Export -->
+        <div class="flex md:hidden items-center gap-2">
+          <button id="dark-toggle-mobile" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+            <i class="fa-solid fa-moon dark:hidden"></i>
+            <i class="fa-solid fa-sun hidden dark:block"></i>
+          </button>
         </div>
-    </section>
+      </div>
 
-    <!-- MAIN CONTENT AREA -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full">
+      <!-- Controls & Views Switcher -->
+      <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
+        <!-- View Tabs -->
+        <div class="bg-slate-100 dark:bg-slate-700/60 p-1 rounded-xl flex items-center text-xs font-semibold shadow-inner">
+          <button id="btn-view-gerencial" onclick="switchView('gerencial')" class="px-4 py-2 rounded-lg transition-all flex items-center gap-2 bg-white dark:bg-slate-800 text-brand-600 dark:text-white shadow-sm">
+            <i class="fa-solid fa-briefcase"></i>
+            <span>Vista Gerencial</span>
+          </button>
+          <button id="btn-view-operativa" onclick="switchView('operativa')" class="px-4 py-2 rounded-lg transition-all flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+            <i class="fa-solid fa-dolly"></i>
+            <span>Vista Operativa</span>
+          </button>
+        </div>
+
+        <!-- Desktop Action Buttons -->
+        <div class="hidden md:flex items-center gap-2">
+          <button id="dark-toggle" class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-700/60 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors">
+            <i class="fa-solid fa-moon dark:hidden"></i>
+            <i class="fa-solid fa-sun hidden dark:block"></i>
+          </button>
+          <button onclick="exportCSV()" class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-brand-600 dark:hover:bg-brand-500 text-white text-xs font-semibold flex items-center gap-2 shadow-sm transition-colors">
+            <i class="fa-solid fa-download"></i>
+            <span>Exportar CSV</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- VIEW 1: VISTA GERENCIAL -->
+    <div id="view-gerencial" class="space-y-6">
+      
+      <!-- KPI Cards Row -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- KPI 1 -->
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-700/60 shadow-sm hover:shadow-md transition-shadow">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Ingresos Totales</span>
+            <div class="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+              <i class="fa-solid fa-sterling-sign"></i>
+            </div>
+          </div>
+          <div class="text-2xl font-black tracking-tight text-slate-900 dark:text-white">£9,747,747.93</div>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1">
+            <span class="text-emerald-500 font-semibold flex items-center"><i class="fa-solid fa-arrow-up text-[10px] mr-0.5"></i>+12.4%</span> vs período anterior
+          </p>
+        </div>
+
+        <!-- KPI 2 -->
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-700/60 shadow-sm hover:shadow-md transition-shadow">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Ticket Promedio</span>
+            <div class="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-950/60 text-brand-600 dark:text-brand-400 flex items-center justify-center">
+              <i class="fa-solid fa-receipt"></i>
+            </div>
+          </div>
+          <div class="text-2xl font-black tracking-tight text-slate-900 dark:text-white">£479.54</div>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Por transacción completada</p>
+        </div>
+
+        <!-- KPI 3 -->
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-700/60 shadow-sm hover:shadow-md transition-shadow">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Clientes Únicos</span>
+            <div class="w-9 h-9 rounded-xl bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+              <i class="fa-solid fa-users"></i>
+            </div>
+          </div>
+          <div class="text-2xl font-black tracking-tight text-slate-900 dark:text-white">4,372</div>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Compradores registrados</p>
+        </div>
+
+        <!-- KPI 4 -->
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-700/60 shadow-sm hover:shadow-md transition-shadow">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Países Activos</span>
+            <div class="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+              <i class="fa-solid fa-globe"></i>
+            </div>
+          </div>
+          <div class="text-2xl font-black tracking-tight text-slate-900 dark:text-white">38</div>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Mercados internacionales</p>
+        </div>
+      </div>
+
+      <!-- Main Charts Row -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Monthly Revenue Trend (2 cols) -->
+        <div class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-700/60 shadow-sm flex flex-col">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h2 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <i class="fa-solid fa-chart-area text-brand-500"></i>
+                Tendencia Mensual de Ingresos
+              </h2>
+              <p class="text-xs text-slate-500 dark:text-slate-400">Evolución de ventas totales (£) por mes (2010 - 2011)</p>
+            </div>
+          </div>
+          <!-- Container with fixed height to prevent Chart.js stretching -->
+          <div class="relative w-full h-80">
+            <canvas id="chartRevenueTrend"></canvas>
+          </div>
+        </div>
+
+        <!-- Top Countries Revenue (1 col) -->
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-700/60 shadow-sm flex flex-col">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h2 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <i class="fa-solid fa-flag text-purple-500"></i>
+                Ventas por País (Top 5)
+              </h2>
+              <p class="text-xs text-slate-500 dark:text-slate-400">Distribución de ingresos por mercado</p>
+            </div>
+          </div>
+          <!-- Container with fixed height to prevent Chart.js stretching -->
+          <div class="relative w-full h-80 flex items-center justify-center">
+            <canvas id="chartCountries"></canvas>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+
+    <!-- VIEW 2: VISTA OPERATIVA -->
+    <div id="view-operativa" class="space-y-6 hidden">
+      
+      <!-- Operational KPI Row -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- KPI 1 -->
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-700/60 shadow-sm hover:shadow-md transition-shadow">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Unidades Despachadas</span>
+            <div class="w-9 h-9 rounded-xl bg-indigo-100 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+              <i class="fa-solid fa-boxes-stacked"></i>
+            </div>
+          </div>
+          <div class="text-2xl font-black tracking-tight text-slate-900 dark:text-white">5,176,414</div>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Volumen total de inventario movido</p>
+        </div>
+
+        <!-- KPI 2 -->
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-700/60 shadow-sm hover:shadow-md transition-shadow">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Catálogo Activo</span>
+            <div class="w-9 h-9 rounded-xl bg-teal-100 dark:bg-teal-950/60 text-teal-600 dark:text-teal-400 flex items-center justify-center">
+              <i class="fa-solid fa-tags"></i>
+            </div>
+          </div>
+          <div class="text-2xl font-black tracking-tight text-slate-900 dark:text-white">3,958</div>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">SKUs (Stock Codes) distintos</p>
+        </div>
+
+        <!-- KPI 3 -->
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-700/60 shadow-sm hover:shadow-md transition-shadow">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Transacciones</span>
+            <div class="w-9 h-9 rounded-xl bg-sky-100 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 flex items-center justify-center">
+              <i class="fa-solid fa-list-check"></i>
+            </div>
+          </div>
+          <div class="text-2xl font-black tracking-tight text-slate-900 dark:text-white">541,909</div>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Líneas auditables de pedido</p>
+        </div>
+
+        <!-- KPI 4 -->
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-700/60 shadow-sm hover:shadow-md transition-shadow">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Devoluciones / Ajustes</span>
+            <div class="w-9 h-9 rounded-xl bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center">
+              <i class="fa-solid fa-rotate-left"></i>
+            </div>
+          </div>
+          <div class="text-2xl font-black tracking-tight text-rose-600 dark:text-rose-400">9,288</div>
+          <p class="text-xs text-rose-500 dark:text-rose-400 font-medium mt-1">Órdenes canceladas / devueltas</p>
+        </div>
+      </div>
+
+      <!-- Operational Charts Row -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        <!-- ========================================== -->
-        <!-- VIEW 1: VISTA GERENCIAL / ADMINISTRATIVA  -->
-        <!-- ========================================== -->
-        <div id="view-gerencial" class="space-y-6">
-            
-            <!-- Executive KPI Cards Grid -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <!-- Card 1 -->
-                <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-slate-200 dark:border-slate-700 relative overflow-hidden">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Facturación Total</p>
-                            <h3 id="kpi-total-revenue" class="text-2xl sm:text-3xl font-bold mt-1 text-slate-900 dark:text-white">$9,747,747</h3>
-                        </div>
-                        <div class="p-3 bg-emerald-100 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 rounded-xl">
-                            <i class="fa-solid fa-dollar-sign text-xl"></i>
-                        </div>
-                    </div>
-                    <div class="mt-3 flex items-center text-xs text-emerald-600 dark:text-emerald-400 font-semibold">
-                        <i class="fa-solid fa-arrow-trend-up mr-1"></i>
-                        <span>+14.2% vs año anterior</span>
-                    </div>
-                </div>
-
-                <!-- Card 2 -->
-                <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-slate-200 dark:border-slate-700 relative overflow-hidden">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Pedidos</p>
-                            <h3 id="kpi-total-orders" class="text-2xl sm:text-3xl font-bold mt-1 text-slate-900 dark:text-white">25,900</h3>
-                        </div>
-                        <div class="p-3 bg-blue-100 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 rounded-xl">
-                            <i class="fa-solid fa-receipt text-xl"></i>
-                        </div>
-                    </div>
-                    <div class="mt-3 flex items-center text-xs text-slate-500 dark:text-slate-400">
-                        <span>Ordenes únicas registradas</span>
-                    </div>
-                </div>
-
-                <!-- Card 3 -->
-                <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-slate-200 dark:border-slate-700 relative overflow-hidden">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Ticket Promedio</p>
-                            <h3 id="kpi-avg-ticket" class="text-2xl sm:text-3xl font-bold mt-1 text-slate-900 dark:text-white">$376.36</h3>
-                        </div>
-                        <div class="p-3 bg-purple-100 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 rounded-xl">
-                            <i class="fa-solid fa-basket-shopping text-xl"></i>
-                        </div>
-                    </div>
-                    <div class="mt-3 flex items-center text-xs text-purple-600 dark:text-purple-400 font-semibold">
-                        <i class="fa-solid fa-arrow-up mr-1"></i>
-                        <span>Ingreso prom. por orden</span>
-                    </div>
-                </div>
-
-                <!-- Card 4 -->
-                <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-slate-200 dark:border-slate-700 relative overflow-hidden">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Clientes Únicos</p>
-                            <h3 id="kpi-unique-customers" class="text-2xl sm:text-3xl font-bold mt-1 text-slate-900 dark:text-white">4,372</h3>
-                        </div>
-                        <div class="p-3 bg-amber-100 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 rounded-xl">
-                            <i class="fa-solid fa-users text-xl"></i>
-                        </div>
-                    </div>
-                    <div class="mt-3 flex items-center text-xs text-slate-500 dark:text-slate-400">
-                        <span>Base de clientes activos</span>
-                    </div>
-                </div>
+        <!-- Top Products Chart (2 cols) - FIX STRETCHING WITH indexAxis: 'y' and h-80 -->
+        <div class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-700/60 shadow-sm flex flex-col">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h2 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <i class="fa-solid fa-warehouse text-brand-500"></i>
+                Productos de Mayor Rotación en Almacén (Top 10 Unidades)
+              </h2>
+              <p class="text-xs text-slate-500 dark:text-slate-400">SKUs con mayor volumen total desglosado por unidades</p>
             </div>
-
-            <!-- Charts Section 1: Line & Donut -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Line Chart: Tendencia Mensual -->
-                <div class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-slate-200 dark:border-slate-700">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="font-bold text-base sm:text-lg text-slate-900 dark:text-white flex items-center gap-2">
-                            <i class="fa-solid fa-chart-line text-brand-500"></i>
-                            Tendencia Mensual de Ventas (USD)
-                        </h2>
-                        <span class="text-xs text-slate-400">Dic 2010 - Dic 2011</span>
-                    </div>
-                    <div class="chart-container">
-                        <canvas id="chartSalesTrend"></canvas>
-                    </div>
-                </div>
-
-                <!-- Horizontal Bar Chart: Top Countries -->
-                <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-slate-200 dark:border-slate-700">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="font-bold text-base sm:text-lg text-slate-900 dark:text-white flex items-center gap-2">
-                            <i class="fa-solid fa-globe text-brand-500"></i>
-                            Top 5 Países por Facturación
-                        </h2>
-                    </div>
-                    <div class="chart-container">
-                        <canvas id="chartTopCountries"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Charts Section 2: Top Products -->
-            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-slate-200 dark:border-slate-700">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="font-bold text-base sm:text-lg text-slate-900 dark:text-white flex items-center gap-2">
-                        <i class="fa-solid fa-trophy text-amber-500"></i>
-                        Top 10 Productos con Mayor Ingreso
-                    </h2>
-                    <span class="text-xs text-slate-400">Generación de Ingresos Netos</span>
-                </div>
-                <div class="chart-container" style="min-height: 320px;">
-                    <canvas id="chartTopProductsRevenue"></canvas>
-                </div>
-            </div>
-
+          </div>
+          <!-- Canvas Wrapper with explicit fixed height -->
+          <div class="relative w-full h-80">
+            <canvas id="chartTopProducts"></canvas>
+          </div>
         </div>
 
-        <!-- ========================================== -->
-        <!-- VIEW 2: VISTA OPERATIVA / EMPLEADOS        -->
-        <!-- ========================================== -->
-        <div id="view-operativa" class="space-y-6 hidden">
-            
-            <!-- Operational KPI Cards Grid -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <!-- Card 1 -->
-                <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-slate-200 dark:border-slate-700">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Unidades Despachadas</p>
-                            <h3 id="kpi-units-dispatched" class="text-2xl sm:text-3xl font-bold mt-1 text-slate-900 dark:text-white">5,176,414</h3>
-                        </div>
-                        <div class="p-3 bg-blue-100 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 rounded-xl">
-                            <i class="fa-solid fa-boxes-stacked text-xl"></i>
-                        </div>
-                    </div>
-                    <div class="mt-3 text-xs text-slate-500 dark:text-slate-400">
-                        Volumen total de inventario movido
-                    </div>
-                </div>
-
-                <!-- Card 2 -->
-                <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-slate-200 dark:border-slate-700">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Catálogo Activo</p>
-                            <h3 id="kpi-active-catalog" class="text-2xl sm:text-3xl font-bold mt-1 text-slate-900 dark:text-white">3,958</h3>
-                        </div>
-                        <div class="p-3 bg-cyan-100 dark:bg-cyan-950/50 text-cyan-600 dark:text-cyan-400 rounded-xl">
-                            <i class="fa-solid fa-tags text-xl"></i>
-                        </div>
-                    </div>
-                    <div class="mt-3 text-xs text-slate-500 dark:text-slate-400">
-                        SKUs (Stock Codes) distintos
-                    </div>
-                </div>
-
-                <!-- Card 3 -->
-                <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-slate-200 dark:border-slate-700">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Transacciones</p>
-                            <h3 id="kpi-total-records" class="text-2xl sm:text-3xl font-bold mt-1 text-slate-900 dark:text-white">541,909</h3>
-                        </div>
-                        <div class="p-3 bg-indigo-100 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 rounded-xl">
-                            <i class="fa-solid fa-list-check text-xl"></i>
-                        </div>
-                    </div>
-                    <div class="mt-3 text-xs text-slate-500 dark:text-slate-400">
-                        Líneas auditables de pedido
-                    </div>
-                </div>
-
-                <!-- Card 4 -->
-                <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-slate-200 dark:border-slate-700">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Devoluciones / Ajustes</p>
-                            <h3 id="kpi-returns-count" class="text-2xl sm:text-3xl font-bold mt-1 text-red-600 dark:text-red-400">9,288</h3>
-                        </div>
-                        <div class="p-3 bg-red-100 dark:bg-red-950/50 text-red-600 dark:text-red-400 rounded-xl">
-                            <i class="fa-solid fa-rotate-left text-xl"></i>
-                        </div>
-                    </div>
-                    <div class="mt-3 text-xs text-red-500 dark:text-red-400 font-semibold">
-                        Órdenes canceladas / devueltas
-                    </div>
-                </div>
+        <!-- Customer Distribution (1 col) -->
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-700/60 shadow-sm flex flex-col">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h2 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <i class="fa-solid fa-chart-pie text-brand-500"></i>
+                Segmentación de Clientes
+              </h2>
+              <p class="text-xs text-slate-500 dark:text-slate-400">Registrados vs Invitados (Guest)</p>
             </div>
-
-            <!-- Charts Grid Operational -->
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                
-                <!-- Left Column: Products Rotation (As requested in Power BI reference) -->
-                <div class="lg:col-span-7 bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="font-bold text-base sm:text-lg text-slate-900 dark:text-white flex items-center gap-2">
-                            <i class="fa-solid fa-warehouse text-brand-500"></i>
-                            Productos de Mayor Rotación en Almacén (Unidades)
-                        </h2>
-                    </div>
-                    <div class="chart-container flex-grow" style="min-height: 420px;">
-                        <canvas id="chartProductRotation"></canvas>
-                    </div>
-                </div>
-
-                <!-- Right Column: Customer Distribution & Units trend -->
-                <div class="lg:col-span-5 space-y-6 flex flex-col justify-between">
-                    
-                    <!-- Donut Chart -->
-                    <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-slate-200 dark:border-slate-700">
-                        <div class="flex justify-between items-center mb-2">
-                            <h2 class="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
-                                <i class="fa-solid fa-pie-chart text-brand-500"></i>
-                                Distribución de Clientes
-                            </h2>
-                        </div>
-                        <div class="chart-container" style="min-height: 220px;">
-                            <canvas id="chartCustomerDistribution"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- Dispatch Units Trend -->
-                    <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-slate-200 dark:border-slate-700">
-                        <div class="flex justify-between items-center mb-2">
-                            <h2 class="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
-                                <i class="fa-solid fa-truck-ramp-box text-brand-500"></i>
-                                Unidades Despachadas por Mes
-                            </h2>
-                        </div>
-                        <div class="chart-container" style="min-height: 180px;">
-                            <canvas id="chartUnitsTrend"></canvas>
-                        </div>
-                    </div>
-
-                </div>
-
-            </div>
-
-            <!-- Interactive Audit Table (Monitoreo de Transacciones) -->
-            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-slate-200 dark:border-slate-700">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-                    <div>
-                        <h2 class="font-bold text-base sm:text-lg text-slate-900 dark:text-white flex items-center gap-2">
-                            <i class="fa-solid fa-table-list text-brand-500"></i>
-                            Monitoreo de Transacciones Auditables
-                        </h2>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">Detalle operativo en tiempo real de órdenes de salida e inventario</p>
-                    </div>
-                    <!-- Search Input -->
-                    <div class="relative w-full sm:w-64">
-                        <input type="text" id="table-search" oninput="searchTable()" placeholder="Buscar por código, prod o factura..." class="w-full bg-slate-50 dark:bg-slate-700 text-xs rounded-xl pl-9 pr-4 py-2 border border-slate-200 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500">
-                        <i class="fa-solid fa-search absolute left-3 top-2.5 text-slate-400 text-xs"></i>
-                    </div>
-                </div>
-
-                <!-- Table Container -->
-                <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700">
-                    <table class="w-full text-left text-xs">
-                        <thead class="bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold border-b border-slate-200 dark:border-slate-600 uppercase tracking-wider">
-                            <tr>
-                                <th class="px-4 py-3">InvoiceNo</th>
-                                <th class="px-4 py-3">Año</th>
-                                <th class="px-4 py-3">StockCode</th>
-                                <th class="px-4 py-3">Descripción</th>
-                                <th class="px-4 py-3 text-right">Cantidad</th>
-                                <th class="px-4 py-3 text-right">Precio Unitario</th>
-                                <th class="px-4 py-3">País</th>
-                            </tr>
-                        </thead>
-                        <tbody id="transaction-table-body" class="divide-y divide-slate-100 dark:divide-slate-700 text-slate-600 dark:text-slate-300">
-                            <!-- Injected via JavaScript -->
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Pagination Footer -->
-                <div class="flex flex-col sm:flex-row items-center justify-between gap-3 mt-4 text-xs text-slate-500 dark:text-slate-400">
-                    <div id="pagination-info">Mostrando 1 a 10 de 50 registros de muestra</div>
-                    <div class="flex items-center space-x-2">
-                        <button onclick="prevPage()" class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 font-medium transition-colors">Anterior</button>
-                        <span id="current-page-display" class="font-bold text-slate-800 dark:text-white">1</span>
-                        <button onclick="nextPage()" class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 font-medium transition-colors">Siguiente</button>
-                    </div>
-                </div>
-            </div>
-
+          </div>
+          <!-- Canvas Wrapper with explicit fixed height -->
+          <div class="relative w-full h-80 flex items-center justify-center">
+            <canvas id="chartCustomerDist"></canvas>
+          </div>
         </div>
 
-    </main>
+      </div>
 
-    <!-- Footer -->
-    <footer class="bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 py-4 mt-8">
-        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500 dark:text-slate-400">
-            E-Commerce Business Intelligence & Logistics Dashboard • Basado en el conjunto de datos de Retail UK (+540K filas)
+    </div>
+
+
+    <!-- DATA TABLE SECTION (Shared) -->
+    <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-700/60 shadow-sm overflow-hidden">
+      <!-- Table Header & Filters -->
+      <div class="p-5 border-b border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div>
+          <h2 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <i class="fa-solid fa-table-list text-slate-500"></i>
+            Detalle de Operaciones Más Recientes
+          </h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Transacciones individuales extraídas del dataset original</p>
         </div>
-    </footer>
 
-    <!-- JAVASCRIPT LOGIC AND CHARTS INITIALIZATION -->
-    <script>
-        // Data Sample for Transaction Audit Table
-        const mockTransactions = [
-            { invoice: "536365", year: "2010", stockCode: "85123A", description: "WHITE HANGING HEART T-LIGHT HOLDER", quantity: 6, unitPrice: 2.55, country: "United Kingdom" },
-            { invoice: "536365", year: "2010", stockCode: "71053", description: "WHITE METAL LANTERN", quantity: 6, unitPrice: 3.39, country: "United Kingdom" },
-            { invoice: "536365", year: "2010", stockCode: "84406B", description: "CREAM CUPID HEARTS COAT HANGER", quantity: 8, unitPrice: 2.75, country: "United Kingdom" },
-            { invoice: "536365", year: "2010", stockCode: "84029G", description: "KNITTED UNION FLAG HOT WATER BOTTLE", quantity: 6, unitPrice: 3.39, country: "United Kingdom" },
-            { invoice: "536366", year: "2010", stockCode: "22633", description: "HAND WARMER UNION JACK", quantity: 6, unitPrice: 1.85, country: "United Kingdom" },
-            { invoice: "536367", year: "2010", stockCode: "84879", description: "ASSORTED COLOUR BIRD ORNAMENT", quantity: 32, unitPrice: 1.69, country: "United Kingdom" },
-            { invoice: "C536379", year: "2010", stockCode: "D", description: "Discount / Return Adjustment", quantity: -1, unitPrice: 27.50, country: "United Kingdom" },
-            { invoice: "536381", year: "2010", stockCode: "21523", description: "DOORMAT FONT CHOCOLATE", quantity: 1, unitPrice: 7.95, country: "United Kingdom" },
-            { invoice: "536384", year: "2010", stockCode: "82484", description: "WOOD BLACK BOARD ANT WHITE FINISH", quantity: 3, unitPrice: 6.45, country: "United Kingdom" },
-            { invoice: "536388", year: "2010", stockCode: "22915", description: "ASSORTED BOTTLE OPENER KEYRING", quantity: 24, unitPrice: 0.42, country: "United Kingdom" },
-            { invoice: "536390", year: "2010", stockCode: "22178", description: "VICTORIAN GLASS HANGING T-LIGHT", quantity: 64, unitPrice: 1.25, country: "Netherlands" },
-            { invoice: "536394", year: "2010", stockCode: "21500", description: "PINK POLKADOT STARTING KIT", quantity: 12, unitPrice: 4.25, country: "Germany" },
-            { invoice: "536414", year: "2010", stockCode: "22139", description: "RETROSPOT TEA SET CERAMIC 11 PCS", quantity: 56, unitPrice: 4.95, country: "EIRE" },
-            { invoice: "536545", year: "2010", stockCode: "21134", description: "LATTE MUG VINTAGE ORNAMENT", quantity: 12, unitPrice: 1.65, country: "France" },
-            { invoice: "C536589", year: "2010", stockCode: "21777", description: "RECIPE BOX PANTRY TEATIME", quantity: -10, unitPrice: 2.95, country: "Germany" },
-            { invoice: "536764", year: "2010", stockCode: "84952C", description: "BLACK RECORD COVER FRAME", quantity: 24, unitPrice: 3.75, country: "United Kingdom" },
-            { invoice: "536995", year: "2010", stockCode: "35951", description: "FOLKART ZINC HEART CHRISTMAS DEC", quantity: 57, unitPrice: 0.85, country: "Australia" },
-            { invoice: "537000", year: "2010", stockCode: "22712", description: "CARDHOLDER GINGHAM CHRISTMAS", quantity: 12, unitPrice: 1.25, country: "Switzerland" },
-            { invoice: "537012", year: "2010", stockCode: "21212", description: "PACK OF 72 RETROSPOT CAKE CASES", quantity: 120, unitPrice: 0.55, country: "United Kingdom" },
-            { invoice: "537015", year: "2010", stockCode: "23084", description: "RABBIT NIGHT LIGHT", quantity: 96, unitPrice: 1.79, country: "Netherlands" }
-        ];
+        <!-- Search Bar -->
+        <div class="relative w-full sm:w-72">
+          <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+          <input type="text" id="table-search" onkeyup="filterTable()" placeholder="Buscar por producto, factura o cliente..." class="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all" />
+        </div>
+      </div>
 
-        let filteredTableData = [...mockTransactions];
-        let currentPage = 1;
-        const rowsPerPage = 5;
+      <!-- Responsive Table -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead>
+            <tr class="bg-slate-50 dark:bg-slate-700/30 border-b border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider">
+              <th class="py-3 px-4">Factura (Invoice)</th>
+              <th class="py-3 px-4">Código (StockCode)</th>
+              <th class="py-3 px-4">Descripción del Producto</th>
+              <th class="py-3 px-4 text-right">Cantidad</th>
+              <th class="py-3 px-4 text-right">Precio Unitario</th>
+              <th class="py-3 px-4 text-right">Total</th>
+              <th class="py-3 px-4 text-center">ID Cliente</th>
+              <th class="py-3 px-4">País</th>
+            </tr>
+          </thead>
+          <tbody id="table-body" class="divide-y divide-slate-100 dark:divide-slate-700/60 text-slate-700 dark:text-slate-300">
+            <!-- Dynamic Insertion via JS -->
+          </tbody>
+        </table>
+      </div>
 
-        // Chart References
-        let chartSalesTrend, chartTopCountries, chartTopProductsRevenue;
-        let chartProductRotation, chartCustomerDistribution, chartUnitsTrend;
+      <!-- Table Footer / Pagination -->
+      <div class="p-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400">
+        <div>Mostrando <span id="page-start" class="font-semibold text-slate-800 dark:text-slate-200">1</span> - <span id="page-end" class="font-semibold text-slate-800 dark:text-slate-200">10</span> de <span id="total-rows" class="font-semibold text-slate-800 dark:text-slate-200">0</span> registros</div>
+        <div class="flex items-center gap-2">
+          <button id="btn-prev" onclick="changePage(-1)" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-40 transition-colors">
+            <i class="fa-solid fa-chevron-left mr-1"></i> Anterior
+          </button>
+          <span id="page-num" class="font-semibold text-slate-700 dark:text-slate-300 px-2">1</span>
+          <button id="btn-next" onclick="changePage(1)" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-40 transition-colors">
+            Siguiente <i class="fa-solid fa-chevron-right ml-1"></i>
+          </button>
+        </div>
+      </div>
+    </div>
 
-        // Global State & Colors
-        const isDark = () => document.documentElement.classList.contains('dark');
-        
-        function getChartColors() {
-            return {
-                text: isDark() ? '#94a3b8' : '#64748b',
-                grid: isDark() ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)',
-                brand: '#3b82f6',
-                accent: '#8b5cf6',
-                emerald: '#10b981',
-                amber: '#f59e0b'
-            };
+  </main>
+
+  <script>
+    // --- Sample Dataset extracted from Online Retail Dataset ---
+    const sampleData = [
+      { invoice: "536365", code: "85123A", desc: "WHITE HANGING HEART T-LIGHT HOLDER", qty: 6, unitPrice: 2.55, customerId: "17850", country: "United Kingdom" },
+      { invoice: "536365", code: "71053", desc: "WHITE METAL LANTERN", qty: 6, unitPrice: 3.39, customerId: "17850", country: "United Kingdom" },
+      { invoice: "536365", code: "84406B", desc: "CREAM CUPID HEARTS COAT HANGER", qty: 8, unitPrice: 2.75, customerId: "17850", country: "United Kingdom" },
+      { invoice: "536365", code: "84029G", desc: "KNITTED UNION FLAG HOT WATER BOTTLE", qty: 6, unitPrice: 3.39, customerId: "17850", country: "United Kingdom" },
+      { invoice: "536365", code: "84029E", desc: "RED WOOLLY HOTTIE WHITE HEART.", qty: 6, unitPrice: 3.39, customerId: "17850", country: "United Kingdom" },
+      { invoice: "536365", code: "22752", desc: "SET 7 BABUSHKA NESTING BOXES", qty: 2, unitPrice: 7.65, customerId: "17850", country: "United Kingdom" },
+      { invoice: "536365", code: "21730", desc: "GLASS STAR FROSTED T-LIGHT HOLDER", qty: 6, unitPrice: 4.25, customerId: "17850", country: "United Kingdom" },
+      { invoice: "536366", code: "22633", desc: "HAND WARMER UNION JACK", qty: 6, unitPrice: 1.85, customerId: "17850", country: "United Kingdom" },
+      { invoice: "536366", code: "22632", desc: "HAND WARMER RED RETROSPOT", qty: 6, unitPrice: 1.85, customerId: "17850", country: "United Kingdom" },
+      { invoice: "536367", code: "84879", desc: "ASSORTED COLOUR BIRD ORNAMENT", qty: 32, unitPrice: 1.69, customerId: "13047", country: "United Kingdom" },
+      { invoice: "536367", code: "22745", desc: "POPPY'S PLAYHOUSE BEDROOM", qty: 6, unitPrice: 2.10, customerId: "13047", country: "United Kingdom" },
+      { invoice: "536367", code: "22748", desc: "POPPY'S PLAYHOUSE KITCHEN", qty: 6, unitPrice: 2.10, customerId: "13047", country: "United Kingdom" },
+      { invoice: "536368", code: "22960", desc: "JAM MAKING SET WITH JARS", qty: 6, unitPrice: 4.25, customerId: "13047", country: "United Kingdom" },
+      { invoice: "536370", code: "22728", desc: "ALARM CLOCK BAKELIKE PINK", qty: 24, unitPrice: 3.75, customerId: "12583", country: "France" },
+      { invoice: "536370", code: "22727", desc: "ALARM CLOCK BAKELIKE RED", qty: 24, unitPrice: 3.75, customerId: "12583", country: "France" },
+      { invoice: "536370", code: "22726", desc: "ALARM CLOCK BAKELIKE GREEN", qty: 12, unitPrice: 3.75, customerId: "12583", country: "France" },
+      { invoice: "536370", code: "21724", desc: "PANDA AND BUNNIES CRAYONS", qty: 12, unitPrice: 0.85, customerId: "12583", country: "France" },
+      { invoice: "536370", code: "21080", desc: "SET/20 RED RETROSPOT PAPER NAPKINS", qty: 24, unitPrice: 0.85, customerId: "12583", country: "France" },
+      { invoice: "536370", code: "21094", desc: "SET/6 RED SPOTTY PAPER PLATES", qty: 12, unitPrice: 0.85, customerId: "12583", country: "France" },
+      { invoice: "536370", code: "22900", desc: "SET 2 TEA TOWELS I LOVE LONDON", qty: 24, unitPrice: 2.95, customerId: "12583", country: "France" },
+      { invoice: "536373", code: "85123A", desc: "WHITE HANGING HEART T-LIGHT HOLDER", qty: 6, unitPrice: 2.55, customerId: "17850", country: "United Kingdom" },
+      { invoice: "536375", code: "82482", desc: "WOODEN PICTURE FRAME WHITE FINISH", qty: 6, unitPrice: 2.10, customerId: "17850", country: "United Kingdom" },
+      { invoice: "536378", code: "22386", desc: "JUMBO BAG PINK POLKADOT", qty: 10, unitPrice: 1.95, customerId: "14688", country: "United Kingdom" },
+      { invoice: "536381", code: "15056BL", desc: "EDWARDIAN PARASOL BLACK", qty: 2, unitPrice: 5.95, customerId: "15311", country: "United Kingdom" },
+      { invoice: "536381", code: "21523", desc: "DOORMAT FRETWORK TILE", qty: 1, unitPrice: 7.95, customerId: "15311", country: "United Kingdom" },
+      { invoice: "536384", code: "22469", desc: "HEART OF WICKER SMALL", qty: 40, unitPrice: 1.45, customerId: "18074", country: "United Kingdom" },
+      { invoice: "536389", code: "22720", desc: "SET OF 3 CAKE TINS PANTRY DESIGN", qty: 6, unitPrice: 4.95, customerId: "12431", country: "Australia" }
+    ];
+
+    let filteredData = [...sampleData];
+    let currentPage = 1;
+    const rowsPerPage = 7;
+
+    // Chart Instances Store
+    let chartRevenueTrend, chartCountries, chartTopProducts, chartCustomerDist;
+
+    // Global Theme Colors helper
+    function getThemeColors() {
+      const isDark = document.documentElement.classList.contains('dark');
+      return {
+        text: isDark ? '#94a3b8' : '#64748b',
+        grid: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)',
+        cardBg: isDark ? '#1e293b' : '#ffffff'
+      };
+    }
+
+    // --- Tab Switching Logic ---
+    function switchView(viewName) {
+      const viewGerencial = document.getElementById('view-gerencial');
+      const viewOperativa = document.getElementById('view-operativa');
+      const btnGerencial = document.getElementById('btn-view-gerencial');
+      const btnOperativa = document.getElementById('btn-view-operativa');
+
+      if (viewName === 'gerencial') {
+        viewGerencial.classList.remove('hidden');
+        viewOperativa.classList.add('hidden');
+
+        btnGerencial.className = "px-4 py-2 rounded-lg transition-all flex items-center gap-2 bg-white dark:bg-slate-800 text-brand-600 dark:text-white shadow-sm font-semibold";
+        btnOperativa.className = "px-4 py-2 rounded-lg transition-all flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white";
+      } else {
+        viewGerencial.classList.add('hidden');
+        viewOperativa.classList.remove('hidden');
+
+        btnOperativa.className = "px-4 py-2 rounded-lg transition-all flex items-center gap-2 bg-white dark:bg-slate-800 text-brand-600 dark:text-white shadow-sm font-semibold";
+        btnGerencial.className = "px-4 py-2 rounded-lg transition-all flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white";
+      }
+
+      // Resize charts when tab becomes visible
+      setTimeout(() => {
+        if (chartRevenueTrend) chartRevenueTrend.resize();
+        if (chartCountries) chartCountries.resize();
+        if (chartTopProducts) chartTopProducts.resize();
+        if (chartCustomerDist) chartCustomerDist.resize();
+      }, 50);
+    }
+
+    // --- Dark Mode Logic ---
+    function setupDarkMode() {
+      const toggleBtns = [document.getElementById('dark-toggle'), document.getElementById('dark-toggle-mobile')];
+      
+      toggleBtns.forEach(btn => {
+        if (!btn) return;
+        btn.addEventListener('click', () => {
+          document.documentElement.classList.toggle('dark');
+          const isDark = document.documentElement.classList.contains('dark');
+          localStorage.setItem('theme', isDark ? 'dark' : 'light');
+          updateChartsTheme();
+        });
+      });
+
+      if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+
+    function updateChartsTheme() {
+      const colors = getThemeColors();
+      [chartRevenueTrend, chartCountries, chartTopProducts, chartCustomerDist].forEach(chart => {
+        if (!chart) return;
+        if (chart.options.scales?.x) {
+          chart.options.scales.x.ticks.color = colors.text;
+          chart.options.scales.x.grid.color = colors.grid;
         }
+        if (chart.options.scales?.y) {
+          chart.options.scales.y.ticks.color = colors.text;
+          chart.options.scales.y.grid.color = colors.grid;
+        }
+        if (chart.options.plugins?.legend) {
+          chart.options.plugins.legend.labels.color = colors.text;
+        }
+        chart.update();
+      });
+    }
 
-        // Initialize App
-        window.onload = function() {
-            initCharts();
-            renderTable();
-        };
+    // --- Initialize Chart.js Charts ---
+    function initCharts() {
+      const colors = getThemeColors();
 
-        // Tab Switching Logic
-        function switchTab(tab) {
-            const viewGerencial = document.getElementById('view-gerencial');
-            const viewOperativa = document.getElementById('view-operativa');
-            
-            const btnGerencial = document.getElementById('tab-gerencial');
-            const btnOperativa = document.getElementById('tab-operativa');
+      // Chart 1: Revenue Trend (Line)
+      const ctxRevenue = document.getElementById('chartRevenueTrend').getContext('2d');
+      const gradient = ctxRevenue.createLinearGradient(0, 0, 0, 300);
+      gradient.addColorStop(0, 'rgba(59, 130, 246, 0.35)');
+      gradient.addColorStop(1, 'rgba(59, 130, 246, 0.0)');
 
-            const btnGerencialMob = document.getElementById('tab-gerencial-mob');
-            const btnOperativaMob = document.getElementById('tab-operativa-mob');
-
-            if (tab === 'gerencial') {
-                viewGerencial.classList.remove('hidden');
-                viewOperativa.classList.add('hidden');
-                
-                // Desktop styling
-                btnGerencial.className = "flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-150 shadow-sm bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400";
-                btnOperativa.className = "flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-150 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white";
-
-                // Mobile styling
-                btnGerencialMob.className = "flex-1 text-center py-2 text-xs font-semibold text-brand-600 dark:text-brand-400 border-b-2 border-brand-600";
-                btnOperativaMob.className = "flex-1 text-center py-2 text-xs font-semibold text-slate-500 dark:text-slate-400";
-            } else {
-                viewGerencial.classList.add('hidden');
-                viewOperativa.classList.remove('hidden');
-                
-                // Desktop styling
-                btnOperativa.className = "flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-150 shadow-sm bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400";
-                btnGerencial.className = "flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-150 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white";
-
-                // Mobile styling
-                btnOperativaMob.className = "flex-1 text-center py-2 text-xs font-semibold text-brand-600 dark:text-brand-400 border-b-2 border-brand-600";
-                btnGerencialMob.className = "flex-1 text-center py-2 text-xs font-semibold text-slate-500 dark:text-slate-400";
+      chartRevenueTrend = new Chart(ctxRevenue, {
+        type: 'line',
+        data: {
+          labels: ['Dic 10', 'Ene 11', 'Feb 11', 'Mar 11', 'Abr 11', 'May 11', 'Jun 11', 'Jul 11', 'Ago 11', 'Sep 11', 'Oct 11', 'Nov 11', 'Dic 11'],
+          datasets: [{
+            label: 'Ingresos Mensuales (£)',
+            data: [748957, 560000, 498061, 683267, 493207, 723333, 691122, 681300, 682680, 1019687, 1070717, 1461756, 433668],
+            borderColor: '#3b82f6',
+            borderWidth: 3,
+            backgroundColor: gradient,
+            fill: true,
+            tension: 0.35,
+            pointBackgroundColor: '#3b82f6',
+            pointRadius: 4,
+            pointHoverRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => ` Ingresos: £${ctx.raw.toLocaleString('en-US')}`
+              }
             }
-        }
-
-        // Dark Mode Toggle
-        function toggleDarkMode() {
-            document.documentElement.classList.toggle('dark');
-            const icon = document.getElementById('theme-icon');
-            if (isDark()) {
-                icon.className = 'fa-solid fa-sun text-amber-400 text-lg';
-            } else {
-                icon.className = 'fa-solid fa-moon text-slate-600 text-lg';
+          },
+          scales: {
+            x: {
+              grid: { color: colors.grid },
+              ticks: { color: colors.text, font: { family: 'Inter', size: 11 } }
+            },
+            y: {
+              grid: { color: colors.grid },
+              ticks: {
+                color: colors.text,
+                font: { family: 'Inter', size: 11 },
+                callback: (val) => `£${(val/1000).toFixed(0)}k`
+              }
             }
-            updateChartsTheme();
+          }
         }
+      });
 
-        // Initialize All Chart.js Instances
-        function initCharts() {
-            const colors = getChartColors();
-
-            // 1. GERENCIAL: Sales Trend Line Chart
-            const ctxSales = document.getElementById('chartSalesTrend').getContext('2d');
-            chartSalesTrend = new Chart(ctxSales, {
-                type: 'line',
-                data: {
-                    labels: ['Dic 10', 'Ene 11', 'Feb 11', 'Mar 11', 'Abr 11', 'May 11', 'Jun 11', 'Jul 11', 'Ago 11', 'Sep 11', 'Oct 11', 'Nov 11', 'Dic 11'],
-                    datasets: [{
-                        label: 'Ventas ($ USD)',
-                        data: [748957, 560000, 498000, 683000, 493000, 723000, 695000, 647000, 682000, 1019000, 1070000, 1461000, 483000],
-                        borderColor: colors.brand,
-                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                        fill: true,
-                        tension: 0.35,
-                        borderWidth: 3,
-                        pointRadius: 4,
-                        pointHoverRadius: 6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false }
-                    },
-                    scales: {
-                        x: { grid: { color: colors.grid }, ticks: { color: colors.text } },
-                        y: { 
-                            grid: { color: colors.grid }, 
-                            ticks: { 
-                                color: colors.text,
-                                callback: value => '$' + (value / 1000) + 'k'
-                            } 
-                        }
-                    }
-                }
-            });
-
-            // 2. GERENCIAL: Top Countries Horizontal Bar
-            const ctxCountries = document.getElementById('chartTopCountries').getContext('2d');
-            chartTopCountries = new Chart(ctxCountries, {
-                type: 'bar',
-                data: {
-                    labels: ['Reino Unido', 'Países Bajos', 'Irlanda (EIRE)', 'Alemania', 'Francia'],
-                    datasets: [{
-                        label: 'Facturación ($ USD)',
-                        data: [8187806, 284661, 263276, 221698, 197403],
-                        backgroundColor: [
-                            '#2563eb', '#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe'
-                        ],
-                        borderRadius: 6
-                    }]
-                },
-                options: {
-                    indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { grid: { color: colors.grid }, ticks: { color: colors.text, callback: v => '$' + (v/1000000).toFixed(1) + 'M' } },
-                        y: { grid: { display: false }, ticks: { color: colors.text } }
-                    }
-                }
-            });
-
-            // 3. GERENCIAL: Top 10 Products by Revenue
-            const ctxProdRev = document.getElementById('chartTopProductsRevenue').getContext('2d');
-            chartTopProductsRevenue = new Chart(ctxProdRev, {
-                type: 'bar',
-                data: {
-                    labels: [
-                        'DOTCOM POSTAGE', 'REGENCY CAKESTAND 3 TIER', 'WHITE HANGING HEART T-LIGHT', 
-                        'PARTY BUNTING', 'JUMBO BAG RED RETROSPOT', 'RABBIT NIGHT LIGHT', 
-                        'POSTAGE', 'PAPER CHAIN KIT 50\'S CHRISTMAS', 'ASSORTED COLOUR BIRD ORNAMENT', 'CHILLI LIGHTS'
-                    ],
-                    datasets: [{
-                        label: 'Ingreso Generado ($ USD)',
-                        data: [206245, 164766, 99668, 98302, 92356, 66756, 66225, 63708, 58959, 53768],
-                        backgroundColor: 'rgba(139, 92, 246, 0.85)',
-                        borderRadius: 6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { grid: { display: false }, ticks: { color: colors.text, maxRotation: 45, minRotation: 20 } },
-                        y: { grid: { color: colors.grid }, ticks: { color: colors.text, callback: v => '$' + (v/1000) + 'k' } }
-                    }
-                }
-            });
-
-            // 4. OPERATIVA: Product Rotation in Warehouse (Horizontal Bar as in image)
-            const ctxRot = document.getElementById('chartProductRotation').getContext('2d');
-            chartProductRotation = new Chart(ctxRot, {
-                type: 'bar',
-                data: {
-                    labels: [
-                        'WORLD WAR 2 GLIDERS ASSTD DESIGNS',
-                        'JUMBO BAG RED RETROSPOT',
-                        'ASSORTED COLOUR BIRD ORNAMENT',
-                        'POPCORN HOLDER',
-                        'PACK OF 72 RETROSPOT CAKE CASES',
-                        'WHITE HANGING HEART T-LIGHT HOLDER',
-                        'RABBIT NIGHT LIGHT',
-                        'MINI PAINT SET VINTAGE',
-                        'PACK OF 12 LONDON TISSUES',
-                        'PACK OF 60 PINK PAISLEY CAKE CASES',
-                        'VICTORIAN GLASS HANGING T-LIGHT',
-                        'RED HARMONICA IN BOX'
-                    ],
-                    datasets: [{
-                        label: 'Unidades Despachadas',
-                        data: [53847, 47363, 36381, 36334, 36039, 35317, 30646, 26437, 26321, 24753, 23854, 21850],
-                        backgroundColor: '#3b82f6',
-                        borderRadius: 4
-                    }]
-                },
-                options: {
-                    indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { grid: { color: colors.grid }, ticks: { color: colors.text, callback: v => (v/1000) + 'k' } },
-                        y: { grid: { display: false }, ticks: { color: colors.text, font: { size: 10 } } }
-                    }
-                }
-            });
-
-            // 5. OPERATIVA: Customer Distribution Donut (Identificados vs Anónimos)
-            const ctxCust = document.getElementById('chartCustomerDistribution').getContext('2d');
-            chartCustomerDistribution = new Chart(ctxCust, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Clientes Registrados (Con ID)', 'Compras Anónimas (Sin ID)'],
-                    datasets: [{
-                        data: [406829, 135080],
-                        backgroundColor: ['#f97316', '#a855f7'],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom', labels: { color: colors.text, font: { size: 11 } } }
-                    },
-                    cutout: '70%'
-                }
-            });
-
-            // 6. OPERATIVA: Units Trend Line
-            const ctxUnits = document.getElementById('chartUnitsTrend').getContext('2d');
-            chartUnitsTrend = new Chart(ctxUnits, {
-                type: 'line',
-                data: {
-                    labels: ['Ene', 'Mar', 'May', 'Jul', 'Sep', 'Nov'],
-                    datasets: [{
-                        label: 'Unidades (Millones)',
-                        data: [0.55, 0.68, 0.49, 0.72, 1.04, 1.45],
-                        borderColor: '#10b981',
-                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                        fill: true,
-                        tension: 0.4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { grid: { display: false }, ticks: { color: colors.text } },
-                        y: { grid: { color: colors.grid }, ticks: { color: colors.text, callback: v => v + 'M' } }
-                    }
-                }
-            });
-        }
-
-        // Update Theme for Charts when Dark Mode Toggles
-        function updateChartsTheme() {
-            const colors = getChartColors();
-            [chartSalesTrend, chartTopCountries, chartTopProductsRevenue, chartProductRotation, chartCustomerDistribution, chartUnitsTrend].forEach(chart => {
-                if (!chart) return;
-                if (chart.options.scales) {
-                    if (chart.options.scales.x) {
-                        chart.options.scales.x.ticks.color = colors.text;
-                        if (chart.options.scales.x.grid) chart.options.scales.x.grid.color = colors.grid;
-                    }
-                    if (chart.options.scales.y) {
-                        chart.options.scales.y.ticks.color = colors.text;
-                        if (chart.options.scales.y.grid) chart.options.scales.y.grid.color = colors.grid;
-                    }
-                }
-                if (chart.options.plugins && chart.options.plugins.legend) {
-                    chart.options.plugins.legend.labels.color = colors.text;
-                }
-                chart.update();
-            });
-        }
-
-        // Filter Logic
-        function applyFilters() {
-            const country = document.getElementById('filter-country').value;
-            const year = document.getElementById('filter-year').value;
-
-            // Simple simulated filter multipliers for illustration
-            let mult = 1.0;
-            if (country !== 'ALL') mult *= 0.35;
-            if (year === '2010') mult *= 0.15;
-            if (year === '2011') mult *= 0.85;
-
-            // Update KPI displays dynamically
-            document.getElementById('kpi-total-revenue').innerText = '$' + (9747747 * mult).toLocaleString('en-US', {maximumFractionDigits: 0});
-            document.getElementById('kpi-total-orders').innerText = Math.round(25900 * mult).toLocaleString();
-            document.getElementById('kpi-units-dispatched').innerText = Math.round(5176414 * mult).toLocaleString();
-
-            // Filter Table Data
-            filteredTableData = mockTransactions.filter(item => {
-                const matchCountry = (country === 'ALL' || item.country === country);
-                const matchYear = (year === 'ALL' || item.year === year);
-                return matchCountry && matchYear;
-            });
-            currentPage = 1;
-            renderTable();
-        }
-
-        function resetFilters() {
-            document.getElementById('filter-country').value = 'ALL';
-            document.getElementById('filter-year').value = 'ALL';
-            applyFilters();
-        }
-
-        // Table Render & Pagination Functions
-        function renderTable() {
-            const tbody = document.getElementById('transaction-table-body');
-            tbody.innerHTML = '';
-
-            const start = (currentPage - 1) * rowsPerPage;
-            const end = start + rowsPerPage;
-            const paginatedItems = filteredTableData.slice(start, end);
-
-            if (paginatedItems.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="px-4 py-6 text-center text-slate-400">No se encontraron transacciones con los filtros seleccionados.</td></tr>`;
-            } else {
-                paginatedItems.forEach(row => {
-                    const isReturn = row.quantity < 0;
-                    const tr = document.createElement('tr');
-                    tr.className = `hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors ${isReturn ? 'bg-red-50/50 dark:bg-red-950/20' : ''}`;
-                    tr.innerHTML = `
-                        <td class="px-4 py-3 font-mono ${isReturn ? 'text-red-600 dark:text-red-400 font-bold' : 'font-medium'}">${row.invoice}</td>
-                        <td class="px-4 py-3 text-slate-500">${row.year}</td>
-                        <td class="px-4 py-3 font-mono text-slate-500">${row.stockCode}</td>
-                        <td class="px-4 py-3 font-medium text-slate-800 dark:text-slate-200">${row.description}</td>
-                        <td class="px-4 py-3 text-right font-bold ${isReturn ? 'text-red-600 dark:text-red-400' : ''}">${row.quantity}</td>
-                        <td class="px-4 py-3 text-right">$${row.unitPrice.toFixed(2)}</td>
-                        <td class="px-4 py-3">${row.country}</td>
-                    `;
-                    tbody.appendChild(tr);
-                });
+      // Chart 2: Top Countries (Doughnut)
+      const ctxCountries = document.getElementById('chartCountries').getContext('2d');
+      chartCountries = new Chart(ctxCountries, {
+        type: 'doughnut',
+        data: {
+          labels: ['United Kingdom', 'Netherlands', 'EIRE (Irlanda)', 'Alemania', 'Francia'],
+          datasets: [{
+            data: [8187806, 284661, 263276, 228867, 197403],
+            backgroundColor: ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'],
+            borderWidth: 0,
+            hoverOffset: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                color: colors.text,
+                font: { family: 'Inter', size: 11 },
+                padding: 14,
+                usePointStyle: true,
+                pointStyle: 'circle'
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => ` ${ctx.label}: £${ctx.raw.toLocaleString('en-US')}`
+              }
             }
-
-            document.getElementById('pagination-info').innerText = 
-                `Mostrando ${filteredTableData.length > 0 ? start + 1 : 0} a ${Math.min(end, filteredTableData.length)} de ${filteredTableData.length} registros`;
-            document.getElementById('current-page-display').innerText = currentPage;
+          },
+          cutout: '70%'
         }
+      });
 
-        function searchTable() {
-            const query = document.getElementById('table-search').value.toLowerCase();
-            filteredTableData = mockTransactions.filter(item => 
-                item.invoice.toLowerCase().includes(query) ||
-                item.stockCode.toLowerCase().includes(query) ||
-                item.description.toLowerCase().includes(query) ||
-                item.country.toLowerCase().includes(query)
-            );
-            currentPage = 1;
-            renderTable();
-        }
-
-        function prevPage() {
-            if (currentPage > 1) {
-                currentPage--;
-                renderTable();
+      // Chart 3: Top Products (Horizontal Bar - IndexAxis: 'y' fixes layout!)
+      const ctxProducts = document.getElementById('chartTopProducts').getContext('2d');
+      chartTopProducts = new Chart(ctxProducts, {
+        type: 'bar',
+        data: {
+          labels: [
+            'WORLD WAR 2 GLIDERS',
+            'JUMBO BAG RED RETROSPOT',
+            'POPCORN HOLDER',
+            'WHITE HANGING HEART T-LIGHT',
+            'ASSORTED COLOUR BIRD ORNAMENT',
+            'PACK OF 70 RETROSPOT TAPE',
+            'MINI PAINT SET VINTAGE',
+            'PACK OF 60 PINK PAISLEY CAKE',
+            'VICTORIAN GLASS HANGING T-LIGHT',
+            'RABBIT NIGHT LIGHT'
+          ],
+          datasets: [{
+            label: 'Unidades Vendidas',
+            data: [53847, 47363, 36334, 36706, 36381, 31728, 26437, 24753, 23854, 30646],
+            backgroundColor: '#3b82f6',
+            borderRadius: 6,
+            hoverBackgroundColor: '#2563eb'
+          }]
+        },
+        options: {
+          indexAxis: 'y', // Makes bars horizontal like Power BI
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => ` Unidades: ${ctx.raw.toLocaleString('en-US')}`
+              }
             }
-        }
-
-        function nextPage() {
-            if (currentPage * rowsPerPage < filteredTableData.length) {
-                currentPage++;
-                renderTable();
+          },
+          scales: {
+            x: {
+              grid: { color: colors.grid },
+              ticks: {
+                color: colors.text,
+                font: { family: 'Inter', size: 10 },
+                callback: (val) => `${(val/1000).toFixed(0)}k`
+              }
+            },
+            y: {
+              grid: { display: false },
+              ticks: {
+                color: colors.text,
+                font: { family: 'Inter', size: 10, weight: '500' }
+              }
             }
+          }
         }
+      });
 
-        // CSV Export Utility
-        function exportTableToCSV() {
-            let csvContent = "data:text/csv;charset=utf-8,InvoiceNo,Year,StockCode,Description,Quantity,UnitPrice,Country\n";
-            mockTransactions.forEach(r => {
-                csvContent += `${r.invoice},${r.year},${r.stockCode},"${r.description}",${r.quantity},${r.unitPrice},${r.country}\n`;
-            });
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", "transacciones_ecommerce_export.csv");
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+      // Chart 4: Customer Distribution (Pie)
+      const ctxCustomer = document.getElementById('chartCustomerDist').getContext('2d');
+      chartCustomerDist = new Chart(ctxCustomer, {
+        type: 'pie',
+        data: {
+          labels: ['Clientes Registrados (ID)', 'Invitados (Sin ID)'],
+          datasets: [{
+            data: [406829, 135080],
+            backgroundColor: ['#06b6d4', '#64748b'],
+            borderWidth: 0,
+            hoverOffset: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                color: colors.text,
+                font: { family: 'Inter', size: 11 },
+                padding: 14,
+                usePointStyle: true,
+                pointStyle: 'circle'
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => ` Transacciones: ${ctx.raw.toLocaleString('en-US')}`
+              }
+            }
+          }
         }
-    </script>
+      });
+    }
+
+    // --- Table Render & Pagination ---
+    function renderTable() {
+      const tbody = document.getElementById('table-body');
+      tbody.innerHTML = '';
+
+      const start = (currentPage - 1) * rowsPerPage;
+      const end = start + rowsPerPage;
+      const pageItems = filteredData.slice(start, end);
+
+      if (pageItems.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-slate-400">No se encontraron registros coincidentes</td></tr>`;
+      } else {
+        pageItems.forEach(item => {
+          const total = (item.qty * item.unitPrice).toFixed(2);
+          const tr = document.createElement('tr');
+          tr.className = 'hover:bg-slate-50/80 dark:hover:bg-slate-700/40 transition-colors';
+          tr.innerHTML = `
+            <td class="py-3 px-4 font-mono text-slate-500 dark:text-slate-400">${item.invoice}</td>
+            <td class="py-3 px-4 font-mono font-medium text-slate-700 dark:text-slate-300">${item.code}</td>
+            <td class="py-3 px-4 font-medium text-slate-900 dark:text-white max-w-xs truncate">${item.desc}</td>
+            <td class="py-3 px-4 text-right font-semibold">${item.qty}</td>
+            <td class="py-3 px-4 text-right">£${item.unitPrice.toFixed(2)}</td>
+            <td class="py-3 px-4 text-right font-bold text-brand-600 dark:text-brand-400">£${total}</td>
+            <td class="py-3 px-4 text-center">
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600">
+                ${item.customerId}
+              </span>
+            </td>
+            <td class="py-3 px-4 text-slate-500 dark:text-slate-400">${item.country}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      // Update pagination indicators
+      document.getElementById('total-rows').innerText = filteredData.length;
+      document.getElementById('page-start').innerText = filteredData.length > 0 ? start + 1 : 0;
+      document.getElementById('page-end').innerText = Math.min(end, filteredData.length);
+      document.getElementById('page-num').innerText = currentPage;
+
+      document.getElementById('btn-prev').disabled = currentPage === 1;
+      document.getElementById('btn-next').disabled = end >= filteredData.length;
+    }
+
+    function changePage(delta) {
+      currentPage += delta;
+      renderTable();
+    }
+
+    function filterTable() {
+      const q = document.getElementById('table-search').value.toLowerCase();
+      filteredData = sampleData.filter(item => 
+        item.desc.toLowerCase().includes(q) ||
+        item.invoice.toLowerCase().includes(q) ||
+        item.code.toLowerCase().includes(q) ||
+        item.customerId.toLowerCase().includes(q) ||
+        item.country.toLowerCase().includes(q)
+      );
+      currentPage = 1;
+      renderTable();
+    }
+
+    // --- CSV Export Logic ---
+    function exportCSV() {
+      let csvContent = "data:text/csv;charset=utf-8,Invoice,StockCode,Description,Quantity,UnitPrice,Total,CustomerID,Country\n";
+      sampleData.forEach(r => {
+        const total = (r.qty * r.unitPrice).toFixed(2);
+        csvContent += `"${r.invoice}","${r.code}","${r.desc}",${r.qty},${r.unitPrice},${total},"${r.customerId}","${r.country}"\n`;
+      });
+
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", "ecommerce_analytics_data.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // --- On Load ---
+    window.onload = function() {
+      setupDarkMode();
+      initCharts();
+      renderTable();
+    };
+  </script>
 </body>
 </html>
