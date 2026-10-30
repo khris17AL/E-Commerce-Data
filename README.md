@@ -26,6 +26,8 @@ El archivo original utilizado contiene **541,909 registros y 8 columnas**. Por t
 
 ## Archivos del repositorio
 
+- [ANALISIS_ESTADISTICO.md](ANALISIS_ESTADISTICO.md): resultados de calidad de datos y estadística descriptiva verificados.
+
 - `limpieza_eda.py`: proceso reproducible de limpieza y EDA.
 - `requirements.txt`: dependencias de Python.
 - `Medidas_DAX.md`: medidas DAX, propuestas de visualización y limitaciones.
