@@ -1,0 +1,14 @@
+# Dataset original y resultados generados localmente
+data.csv
+salida/
+
+# Entornos y caché de Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+
+# Configuración local de editores
+.vscode/
+.DS_Store
+Thumbs.db
